@@ -6,23 +6,44 @@ pipeline {
     stages {
         stage('Code') {
             steps {
-              git 'https://github.com/sbagavathi1911/web-app.git'
+                git 'https://github.com/sbagavathi1911/web-app.git'
             }
         }
-        stage('build') {
+
+        stage('Build') {
             steps {
-                 sh "mvn clean package"
+                sh 'mvn clean package'
             }
         }
-        stage('artifact') {
+
+        stage('Artifact Upload') {
             steps {
-                     nexusArtifactUploader artifacts: [[artifactId: 'mywebapps', classifier: '', file: 'target/myweb-8.6.5', type: '.war']], credentialsId: 'admin', groupId: 'in.javahome', nexusUrl: '52.210.224.48:808', nexusVersion: 'nexus3', protocol: 'http', repository: 'devil', version: '8.6.5'
-                   }
-             }
+                nexusArtifactUploader(
+                    artifacts: [[
+                        artifactId: 'mywebapps',
+                        classifier: '',
+                        file: 'target/myweb-8.6.5.war',
+                        type: 'war'
+                    ]],
+                    credentialsId: 'admin',
+                    groupId: 'in.javahome',
+                    nexusUrl: '52.210.224.48:8081',
+                    nexusVersion: 'nexus3',
+                    protocol: 'http',
+                    repository: 'devil',
+                    version: '8.6.5'
+                )
+            }
+        }
     }
-    post{
+
+    post {
         success {
-            echo "sucess"
+            echo 'Build and artifact upload successful!'
+        }
+        failure {
+            echo 'Pipeline failed!'
         }
     }
 }
+
